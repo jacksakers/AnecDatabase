@@ -31,6 +31,8 @@ class LogIn extends Component {
       // This function will be called whenever the authentication state changes
       // this.props.didLogIn(user);
     });
+    if (auth.currentUser) this.props.didLogIn(auth.currentUser);
+
 
     // Clean up the subscription when the component unmounts
     return () => unsubscribe();
@@ -83,7 +85,7 @@ class LogIn extends Component {
       return;
     }
     await registerWithEmailAndPassword(name, email, password);
-    // if (auth.currentUser) this.props.didLogIn(name);
+    if (auth.currentUser) this.props.didLogIn(name);
   }
 
   LogInForm() {

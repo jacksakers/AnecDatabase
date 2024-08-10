@@ -4,6 +4,7 @@ import LogIn from "./pages/login";
 import NewNavbar from "./components/newnavbar";
 import "bootstrap/dist/css/bootstrap.min.css";
 import React from "react";
+import Profile from './pages/profile';
 
 class App extends React.Component {
   constructor(props) {
@@ -35,12 +36,12 @@ class App extends React.Component {
     }
   }
 
-  handleLogIn(uName) {
-    this.setState({ isLoggedIn: true, username: uName });
+    handleLogIn(uName) {
+    this.setState({ isLoggedIn: true, username: uName});
+    this.switchPageTo("profile")
   }
 
   handleLogOut() {
-    console.log("logging out");
     this.setState({ currentPage: "find" });
   }
 
@@ -49,7 +50,9 @@ class App extends React.Component {
       case "home":
         return <Home />;
       case "login":
-        return <LogIn />;
+        return <LogIn didLogIn={(uName) => this.handleLogIn(uName)}/>;
+      case "profile":
+        return <Profile handleLogOut={() => this.handleLogOut()}/>;
       default:
         return <></>;
     }
@@ -68,18 +71,12 @@ class App extends React.Component {
   }
 
   switchPageTo(newPage) {
-    if (newPage !== "create") this.setState({orgCreation: false});
     this.setState({ currentPage: newPage });
-    if (newPage === "profile") {
-      this.updateParams(`page=account&uid=${this.state.uid}`);
-      return;
-    }
     this.updateParams(`page=${newPage}`);
   }
 
   render() {
     return (
-      
       <div className="App">
         <NewNavbar switchPageTo={this.switchPageTo.bind(this)} />
         {this.renderContent()}
