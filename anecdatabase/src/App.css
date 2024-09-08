@@ -44,3 +44,13 @@ body {
   flex-direction: column;
   align-items: center;
 }
+
+.my-data {
+  display: flex;
+}
+
+.my-data-subfolders {
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px;
+}

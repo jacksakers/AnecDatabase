@@ -7,6 +7,8 @@ import React from "react";
 import Profile from './pages/profile';
 import Find from './pages/find';
 import Create from './pages/create';
+import MyData from './pages/my-data';
+import ViewDatum from './pages/view-datum';
 
 class App extends React.Component {
   constructor(props) {
@@ -15,6 +17,8 @@ class App extends React.Component {
       currentPage: "find",
       isLoggedIn: false,
       username: "GUEST",
+      vdType: "",
+      vdDocId: ""
     };
   }
 
@@ -34,13 +38,18 @@ class App extends React.Component {
     }
   }
 
-    handleLogIn(uName) {
+  handleLogIn(uName) {
     this.setState({ isLoggedIn: true, username: uName});
     this.switchPageTo("profile")
   }
 
   handleLogOut() {
     this.setState({ currentPage: "find" });
+  }
+
+  handleOpenDatum(type, docId) {
+    this.updateParams(`page=view-datum&datumID=${docId}&type=${type}`);
+    this.setState({ vdType: type, vdDocId: docId, currentPage: 'view-datum' });
   }
 
   renderContent() {
@@ -52,7 +61,11 @@ class App extends React.Component {
       case "profile":
         return <Profile handleLogOut={() => this.handleLogOut()}/>;
       case "create":
-        return <Create handleLogOut={() => this.handleLogOut()}/>;
+        return <Create />;
+      case "my-data":
+        return <MyData openDatum={(type, docId) => this.handleOpenDatum(type, docId)}/>;
+      case "view-datum":
+        return <ViewDatum type={this.state.vdType} docId={this.state.vdDocId}/>
       default:
         return <Find />;
     }

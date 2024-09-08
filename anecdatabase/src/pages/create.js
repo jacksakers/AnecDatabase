@@ -7,7 +7,6 @@ import Card from "react-bootstrap/Card";
 import Form from "react-bootstrap/Form";
 import { Button, Spinner } from "react-bootstrap";
 import {
-  addDoc,
   collection,
   query,
   getDocs,
@@ -65,6 +64,7 @@ class Create extends Component {
       header_img_addr: "",
       logo_img_addr: "",
       location: "",
+      era: "",
       //photos: [],
       private: false,
       tags: [],
@@ -73,7 +73,8 @@ class Create extends Component {
       uploadSpinner: <></>,
       formElements: <></>,
       anecdatumType: "Anecdatum Type",
-      locationList: []
+      locationList: [],
+      eraList: []
     };
   }
 
@@ -125,6 +126,20 @@ class Create extends Component {
     }
   }
 
+  async onEraChange(opt) {
+    if (opt.__isNew__) {
+      const datum = {
+        anecdatumType: "Era",
+        title: opt.label,
+        creator: auth.currentUser.uid
+      }
+      const docId = await this.uploadDatum(datum);
+      this.setState({ era: `${docId}+-+${opt.label}` });
+    } else {
+      this.setState({ era: `${opt.docId}+-+${opt.label}` });
+    }
+  }
+
   onDescriptionChange(e) {
     this.setState({ description: e.target.value });
   }
@@ -170,11 +185,22 @@ class Create extends Component {
     const docId = makeid(8);
     const datumRef = doc(db, `${datum.anecdatumType}`, `${docId}+-+${datum.title.replace(/\//g, '')}`);
     // attempt to upload to firebase
+    if (datum.era) {
+      if (datum.era.split("+-+").length > 2) {
+        datum.era = datum.era.split("+-+")[0] + "+-+" + datum.era.split("+-+")[1];
+      }
+    }
+    if (datum.location) {
+      if (datum.location.split("+-+").length > 2) {
+        datum.location = datum.location.split("+-+")[0] + "+-+" + datum.location.split("+-+")[1];
+      }
+    }
     await setDoc(datumRef, {
       creator: datum.creator ? datum.creator : "",
       date: datum.date ? datum.date : "",
       description: datum.description ? datum.description : "",
       location: datum.location ? datum.location : "",
+      era: datum.era ? datum.era : "",
       photos: [],
       title: datum.title ? datum.title : "",
       docId: docId
@@ -209,6 +235,7 @@ class Create extends Component {
       header_img_addr: this.state.header_img_addr,
       logo_img_addr: this.state.logo_img_addr,
       location: this.state.location,
+      era: this.state.era,
       photos: [],
       title: this.state.title,
     }
@@ -245,10 +272,10 @@ class Create extends Component {
       formElements: <></>,
       anecdatumType: "Anecdatum Type"
     })
-    this.getLocations();
+    this.getData();
   }
 
-  async getLocations() {
+  async getData() {
     const locationQ = query(collection(db, "Place"), where("creator", "==", auth.currentUser.uid));
     const querySnapshot = await getDocs(locationQ);
     let _locationList = [];
@@ -256,7 +283,14 @@ class Create extends Component {
       let locationName = doc.data().title;
       _locationList.push({label: locationName, docId: doc.id.split('+-+')[0]});
     });
-    this.setState({locationList: _locationList});
+    const eraQ = query(collection(db, "Era"), where("creator", "==", auth.currentUser.uid));
+    const querySnapshot2 = await getDocs(eraQ);
+    let _eraList = [];
+    querySnapshot2.forEach((doc) => {
+      let eraName = doc.data().title;
+      _eraList.push({label: eraName, docId: doc.id.split('+-+')[0]});
+    });
+    this.setState({locationList: _locationList, eraList: _eraList});
   }
 
   async populateForm(arrayOfInputs) {
@@ -346,25 +380,30 @@ class Create extends Component {
             >
             <div className="create-text-input">
                 {returnElem}    
+                <CreatableSelect
+                  options={this.state.eraList}
+                  onChange={opt => this.onEraChange(opt)}
+                  placeholder="Select or Enter Era"
+                  />
             </div>
             <div className="create-settings-div">
-            <div className="create-btn">
-              <Button
-                type="submit"
-                className="create-submit-btn"
-                onClick={() => console.log("Submit Btn")}
-              >
-                Create Datum
-              </Button>
+              <div className="create-btn">
+                <Button
+                  type="submit"
+                  className="create-submit-btn"
+                  onClick={() => console.log("Submit Btn")}
+                >
+                  Create Datum
+                </Button>
+              </div>
             </div>
-          </div>
-            </Form>;
+          </Form>;
   }
 
   componentDidMount() {
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        this.getLocations();
+        this.getData();
       }
     });
   }
