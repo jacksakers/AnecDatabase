@@ -1,8 +1,3 @@
-/* My Events Page
-Accessible from "My Events" in the header. Shows all events you own
-or are participating in, allowing you to go to their respective
-event pages.  */
-
 import React, {Component } from "react";
 import "../App.css";
 import {

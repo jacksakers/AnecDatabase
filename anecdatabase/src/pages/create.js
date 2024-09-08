@@ -1,7 +1,3 @@
-/* Create Page
-Renders the Event Creation page which allows users to create events with input for
-key metadata like name, description, image, location, time, etc. Uploads to firebase. */
-
 import React, { Component } from "react";
 import Card from "react-bootstrap/Card";
 import Form from "react-bootstrap/Form";
