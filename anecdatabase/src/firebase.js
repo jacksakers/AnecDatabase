@@ -55,16 +55,11 @@ const registerWithEmailAndPassword = async (name, email, password) => {
   try {
     const res = await createUserWithEmailAndPassword(auth, email, password);
     const user = res.user;
-    await setDoc(doc(db, "users", user.uid), {
+    await setDoc(doc(db, "users", `${user.uid}`), {
       uid: user.uid,
       name,
       email,
-      aff_orgs: [],
       bio: "Add a Bio",
-      dob: new Date("2000-01-01"),
-      location: "Add a Location",
-      my_events: [],
-      socials: ["insta+-+","x+-+","facebook+-+"]
     });
   } catch (err) {
     console.error(err);
@@ -90,16 +85,11 @@ const signInWithGoogle = async () => {
     const q = query(collection(db, "users"), where("uid", "==", user.uid));
     const docs = await getDocs(q);
     if (docs.docs.length === 0) {
-      await setDoc(doc(db, "users", user.uid), {
+      await setDoc(doc(db, "users", `${user.uid}+-+${user.displayName}`), {
         uid: user.uid,
         name: user.displayName,
         email: user.email,
-        aff_orgs: [],
         bio: "Add a Bio",
-        dob: new Date("2000-01-01"),
-        location: "Add a Location",
-        my_events: [],
-        socials: ["insta+-+","x+-+","facebook+-+"]
       });
     }
   } catch (err) {

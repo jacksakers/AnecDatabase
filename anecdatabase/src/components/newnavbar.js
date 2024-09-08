@@ -46,10 +46,10 @@ class NewNavbar extends React.Component {
                 </Nav.Link>
                 <Nav.Link
                   onClick={() => {
-                    this.props.switchPageTo("my-events");
+                    this.props.switchPageTo("my-data");
                   }}
                 >
-                  My Events
+                  My Data
                 </Nav.Link>
                 <Nav.Link
                   onClick={() => {

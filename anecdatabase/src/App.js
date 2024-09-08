@@ -5,6 +5,8 @@ import NewNavbar from "./components/newnavbar";
 import "bootstrap/dist/css/bootstrap.min.css";
 import React from "react";
 import Profile from './pages/profile';
+import Find from './pages/find';
+import Create from './pages/create';
 
 class App extends React.Component {
   constructor(props) {
@@ -21,16 +23,12 @@ class App extends React.Component {
     const params = new URLSearchParams(window.location.search);
     const pageTitle = params.get("page");
     var uidParam = params.get("uid");
-    var oidParam = params.get("oid");
-    var eventParam = params.get("eventid");
 
     // If there is a 'page' query parameter, navigate to the corresponding page
     if (pageTitle) {
       this.setState({
         currentPage: pageTitle,
         uid: uidParam,
-        oid: oidParam,
-        currentEvent: eventParam,
       });
       this.renderContent();
     }
@@ -53,8 +51,10 @@ class App extends React.Component {
         return <LogIn didLogIn={(uName) => this.handleLogIn(uName)}/>;
       case "profile":
         return <Profile handleLogOut={() => this.handleLogOut()}/>;
+      case "create":
+        return <Create handleLogOut={() => this.handleLogOut()}/>;
       default:
-        return <></>;
+        return <Find />;
     }
   }
 
