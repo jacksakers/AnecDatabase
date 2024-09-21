@@ -44,7 +44,7 @@ class App extends React.Component {
   }
 
   handleLogOut() {
-    this.setState({ currentPage: "find" });
+    this.switchPageTo("find")
   }
 
   handleOpenDatum(type, docId) {
