@@ -70,31 +70,36 @@ class MyData extends Component {
 
     componentDidMount() {
       onAuthStateChanged(auth, async (user) => {
-        const eraData = await this.getDataWhere("Era", "creator", user.uid);
-        let _eraElems = [];
-        eraData.forEach((datum) => {
-          _eraElems.push(<li >
-                          <div onClick={async () => await this.openEra(datum.docId)}>
-                            {datum.label}</div>
-                        </li>);
-        })
-        this.setState({eraElems: _eraElems});
+        if (user) {
+          const eraData = await this.getDataWhere("Era", "creator", user.uid);
+          let _eraElems = [];
+          eraData.forEach((datum) => {
+            _eraElems.push(<li >
+                            <div onClick={async () => await this.openEra(datum.docId)}>
+                              {datum.label}</div>
+                          </li>);
+          })
+          this.setState({eraElems: _eraElems});
+        }
       })
     }
 
     render() {
       return (
         <div className="my-data">
-          <div className="my-data-eras">
-            <h2>Eras</h2>
-            <ul className="era-ul">
-              {this.state.eraElems}
-              <li>
-                <div onClick={async () => await this.openEra("")}>
-                Unknown Era</div>
-              </li>
-            </ul>
-          </div>
+              {this.state.eraElems.length > 0 ?  
+                <div className="my-data-eras">
+                  <h2>Eras</h2>
+                  <ul className="era-ul">
+                  {this.state.eraElems} 
+                      <li>
+                        <div onClick={async () => await this.openEra("")}>
+                        Unknown Era</div>
+                      </li>
+                  </ul>
+                </div> :
+                <h2>No Data</h2>
+              }
           <div className="my-data-subfolders">
             <div className="my-data-events">
               {(this.state.openedEraDocs.events.length !== 0) ? <h2>Events</h2> : <></>}
