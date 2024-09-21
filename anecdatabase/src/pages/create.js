@@ -366,6 +366,17 @@ class Create extends Component {
               </div>
             )
             break;
+          case "era":
+            returnElem.push(
+              <div className="form-control-create">
+                <CreatableSelect
+                  options={this.state.eraList}
+                  onChange={opt => this.onEraChange(opt)}
+                  placeholder="Select or Enter Era"
+                  />
+              </div>
+            )
+            break;
           default:
             break;
         }
@@ -376,11 +387,6 @@ class Create extends Component {
             >
             <div className="create-text-input">
                 {returnElem}    
-                <CreatableSelect
-                  options={this.state.eraList}
-                  onChange={opt => this.onEraChange(opt)}
-                  placeholder="Select or Enter Era"
-                  />
             </div>
             <div className="create-settings-div">
               <div className="create-btn">
@@ -412,19 +418,19 @@ class Create extends Component {
               break;
         case "Event":
             this.setState({anecdatumType: type,
-              formElements: await this.populateForm(["title", "date", "description", "location"])});
+              formElements: await this.populateForm(["title", "date", "description", "location", "era"])});
               break;
         case "Person":
             this.setState({anecdatumType: type,
-              formElements: await this.populateForm(["name", "description"])});
+              formElements: await this.populateForm(["name", "description", "era"])});
               break;
         case "Place":
             this.setState({anecdatumType: type,
-              formElements: await this.populateForm(["title", "description", "location"])});
+              formElements: await this.populateForm(["title", "description", "location", "era"])});
               break;
         case "Update":
             this.setState({anecdatumType: type,
-              formElements: await this.populateForm(["title", "date", "description", "location"])});
+              formElements: await this.populateForm(["title", "date", "description", "location", "era"])});
               break;
         default:
             break;

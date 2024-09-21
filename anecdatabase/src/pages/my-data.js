@@ -24,7 +24,13 @@ class MyData extends Component {
     }
 
     async getDataWhere(_collection, field, target) {
-      const q = query(collection(db, _collection), where(field, "==", target));
+      let q;
+      if (target === "") { 
+        q = query(collection(db, _collection), where(field, "==", target), 
+                                                where("creator", "==", auth.currentUser.uid));
+      } else {
+        q = query(collection(db, _collection), where(field, "==", target));
+      }
       const querySnapshot = await getDocs(q);
       let dataList = [];
       querySnapshot.forEach((doc) => {
