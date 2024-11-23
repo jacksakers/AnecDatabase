@@ -18,6 +18,11 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import CreatableSelect from 'react-select/creatable';
 import { onAuthStateChanged } from "firebase/auth";
 import makeid from "../components/makeid.js";
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+const genAI = new GoogleGenerativeAI(
+  "AI KEY"
+);
 
 // Util function; takes user image file, uploads to firebase storage, and returns
 // promise for a image url
@@ -70,7 +75,8 @@ class Create extends Component {
       formElements: <></>,
       anecdatumType: "Anecdatum Type",
       locationList: [],
-      eraList: []
+      eraList: [],
+      memoryDescription: ""
     };
   }
 
@@ -179,7 +185,7 @@ class Create extends Component {
 
   async uploadDatum(datum) {
     const docId = makeid(8);
-    const datumRef = doc(db, `${datum.anecdatumType}`, `${docId}+-+${datum.title.replace(/\//g, '')}`);
+    const datumRef = doc(db, `${datum.type}`, `${docId}+-+${datum.title.replace(/\//g, '')}`);
     // attempt to upload to firebase
     if (datum.era) {
       if (datum.era.split("+-+").length > 2) {
@@ -206,7 +212,7 @@ class Create extends Component {
 
   // attempts to upload new event to firebase after data validation
   handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
 
     // user must submit a valid title, date, and location
     if (!this.state.title.trim()) {
@@ -437,6 +443,64 @@ class Create extends Component {
     }
   }
 
+  onMemoryDescriptionChange(e) {
+    this.setState({ memoryDescription: e.target.value });
+  }
+
+  processResponse(response) {
+    let processedResponse = "";
+    const text = response.text();
+    // remove anything from the response that is not JSON
+    if (text.includes("```JSON")) {
+      processedResponse = text.split("```JSON")[1];
+    } else if (text.includes("``` JSON")) {
+      processedResponse = text.split("```json")[1];
+    } else if (text.includes("```json")) {
+      processedResponse = text.split("```json")[1];
+    } else if (text.includes("```")) {
+      processedResponse = text.split("```")[1];
+    }
+
+    if (processedResponse.includes("```")) {
+      processedResponse = processedResponse.split("```")[0];
+      console.log(processedResponse);
+    }
+    return processedResponse;
+  }
+
+  async getResponseForGivenPrompt(prompt) {
+    try{
+      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+      const prePrompt = "Return just a JSON object that has the following fields filled out based on the given prompt: " +
+      "date: the date of the prompt, description: a description of the prompt (required), era: the era of life that the prompt may have happened (required), " +
+      "location: the location of where the prompt happened (required), title: a short title or name of the prompt (required), " + 
+      "type: the type of prompt (options are Event, Place, Person, or Update)(required). " +
+      "Here is the prompt: ";
+      const result = await model.generateContent(prePrompt + prompt);
+      const response = await result.response;
+      const text = await response.text();
+      this.setState({
+        response, 
+        text
+      });
+      const processedResponse = this.processResponse(response);
+      const datum = JSON.parse(processedResponse);
+      datum.creator = auth.currentUser.uid;
+      datum.era = "ai+-+AI Created";
+      console.log(datum);
+      // attempt to upload to firebase
+      try {
+        const docId = this.uploadDatum(datum);
+        this.handleDatumCreated(docId);
+      } catch (error) {
+        console.error(error.message);
+      }
+    }
+    catch(error){
+      console.log(error);
+    }
+  }
+
   render() {
     return (
       <>
@@ -466,6 +530,20 @@ class Create extends Component {
                 </Dropdown.Menu>
             </Dropdown>
             {this.state.formElements}
+            <Form.Group controlId="formMemoryDescription">
+              <Form.Control
+                as="textarea"
+                rows={3}
+                placeholder="Enter a description of a memory"
+                onChange={(e) => this.onMemoryDescriptionChange(e)}
+              />
+              <Button
+                variant="primary"
+                onClick={() => this.getResponseForGivenPrompt(this.state.memoryDescription)}
+              >
+                Submit Memory Description
+              </Button>
+            </Form.Group>
         </Card>
       </>
     );
