@@ -19,9 +19,10 @@ import CreatableSelect from 'react-select/creatable';
 import { onAuthStateChanged } from "firebase/auth";
 import makeid from "../components/makeid.js";
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { APIKEY } from "../apikey.js";
 
 const genAI = new GoogleGenerativeAI(
-  "AI KEY"
+  APIKEY
 );
 
 // Util function; takes user image file, uploads to firebase storage, and returns
@@ -185,6 +186,19 @@ class Create extends Component {
 
   async uploadDatum(datum) {
     const docId = makeid(8);
+    if (!datum.title || !datum.type) {
+      toast.error('Please try submitting again', {
+        position: "top-center",
+        autoClose: 2500,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+      return;
+    }
     const datumRef = doc(db, `${datum.type}`, `${docId}+-+${datum.title.replace(/\//g, '')}`);
     // attempt to upload to firebase
     if (datum.era) {
